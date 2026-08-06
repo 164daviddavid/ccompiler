@@ -13,3 +13,6 @@ endif
 
 ccompiler: ccompiler.c
 	gcc ccompiler.c -o ccompiler $(CFLAGS) -I/usr/lib/llvm-18/include/ -L/usr/lib/llvm-18/include/ -lLLVM-18
+
+clean:
+	rm -f ./ccompiler
