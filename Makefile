@@ -3,6 +3,8 @@ CFLAGS = -Wall -Wextra
 
 ifeq ($(BUILD),debug)
     CFLAGS += -g -DDEBUG
+else ifeq ($(BUILD),asan)
+    CFLAGS += -g -fsanitize=address
 else ifeq ($(BUILD),release)
     CFLAGS += -DNDEBUG
 else
