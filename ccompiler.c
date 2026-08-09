@@ -47,8 +47,30 @@ int main() {
 
 	// Temporary call to dump module for experimentation purposes
 	LLVMDumpModule(module);
-
 	
+	LLVMValueRef function_iterator = LLVMGetFirstFunction(module);
+	size_t function_num = 0;
+	while (function_iterator != NULL) {
+		// Temporary call to print function name
+		size_t function_name_length;
+		const char *function_name = LLVMGetValueName2(function_iterator, &function_name_length);
+
+		printf("Function %ld - Name - %.*s:\n", function_num, (int) function_name_length, function_name);
+		unsigned int num_of_basic_blocks = LLVMCountBasicBlocks(function_iterator);
+		LLVMBasicBlockRef block_iterator = LLVMGetFirstBasicBlock(function_iterator);
+		for (size_t block = 0; block < num_of_basic_blocks; block++) {
+			// Temporary call to dump basic block for experimentation purposes
+			printf("Basic Block %ld - Name - %s:\n", block, LLVMGetBasicBlockName(block_iterator));
+			LLVMDumpValue(LLVMBasicBlockAsValue(block_iterator));
+			
+			block_iterator = LLVMGetNextBasicBlock(block_iterator);		
+		}
+
+		function_num++;
+		function_iterator = LLVMGetNextFunction(function_iterator);
+	}
+
+
 	cleanup_LLVM(context_ref, module, NULL);
 	
 	
