@@ -62,6 +62,20 @@ int main() {
 			// Temporary call to dump basic block for experimentation purposes
 			printf("Basic Block %ld - Name - %s:\n", block, LLVMGetBasicBlockName(block_iterator));
 			LLVMDumpValue(LLVMBasicBlockAsValue(block_iterator));
+
+			LLVMValueRef instruction_iterator = LLVMGetFirstInstruction(block_iterator);
+
+			size_t instruction_num = 0;
+			while (instruction_iterator != NULL) {
+				// Temporary call to print instructions
+				printf("Instruction %ld: ", instruction_num);
+				fflush(stdout);
+				LLVMDumpValue(instruction_iterator);
+				putchar('\n');
+
+				instruction_num++;
+				instruction_iterator = LLVMGetNextInstruction(instruction_iterator);
+			}
 			
 			block_iterator = LLVMGetNextBasicBlock(block_iterator);		
 		}
