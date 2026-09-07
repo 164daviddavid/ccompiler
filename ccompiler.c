@@ -73,6 +73,22 @@ int main() {
 				LLVMDumpValue(instruction_iterator);
 				putchar('\n');
 
+				// Temporary call to print LLVMOpcode and related information
+				LLVMOpcode opcode = LLVMGetInstructionOpcode(instruction_iterator);
+				printf("Opcode: %d\n", opcode);
+				unsigned int num_of_operands = LLVMGetNumOperands(instruction_iterator);
+				for (unsigned int i = 0; i < num_of_operands; i++) {
+					LLVMValueRef current_operand = LLVMGetOperand(instruction_iterator, i);
+					LLVMTypeRef operand_type = LLVMTypeOf(current_operand);
+					
+					char *operand_as_string = LLVMPrintValueToString(current_operand);
+					char *type_as_string = LLVMPrintTypeToString(operand_type);
+    					printf("Operand %u with type %s: %s\n", i, type_as_string, operand_as_string);
+    					LLVMDisposeMessage(operand_as_string);
+					LLVMDisposeMessage(type_as_string);
+				}
+
+
 				instruction_num++;
 				instruction_iterator = LLVMGetNextInstruction(instruction_iterator);
 			}
