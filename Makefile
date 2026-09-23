@@ -11,8 +11,8 @@ else
     $(error Unknown build type: $(BUILD))
 endif
 
-ccompiler: ccompiler.c
-	gcc ccompiler.c -o ccompiler $(CFLAGS) -I/usr/lib/llvm-18/include/ -L/usr/lib/llvm-18/include/ -lLLVM-18
+ccompiler: ccompiler.c util.c
+	gcc $^ -o ccompiler $(CFLAGS) -I/usr/lib/llvm-18/include/ -L/usr/lib/llvm-18/include/ -lLLVM-18
 
 clean:
 	rm -f ./ccompiler
