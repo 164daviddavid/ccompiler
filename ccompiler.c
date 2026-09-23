@@ -3,6 +3,8 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/IRReader.h>
 
+#include "util.h"
+
 
 /**
  * Calls the relevant functions to dispose LLVM structures that have been allocated.
@@ -76,16 +78,24 @@ int main() {
 				// Temporary call to print LLVMOpcode and related information
 				LLVMOpcode opcode = LLVMGetInstructionOpcode(instruction_iterator);
 				printf("Opcode: %d\n", opcode);
+				//if (LLVMIsACallInst(instruction_iterator)) printf("...Is a Call Inst\n");
+				//if (LLVMIsAAllocaInst(instruction_iterator)) printf("...Is a Alloca Inst\n");
+
 				unsigned int num_of_operands = LLVMGetNumOperands(instruction_iterator);
 				for (unsigned int i = 0; i < num_of_operands; i++) {
 					LLVMValueRef current_operand = LLVMGetOperand(instruction_iterator, i);
 					LLVMTypeRef operand_type = LLVMTypeOf(current_operand);
+					LLVMValueKind value_kind = LLVMGetValueKind(current_operand);
 					
 					char *operand_as_string = LLVMPrintValueToString(current_operand);
 					char *type_as_string = LLVMPrintTypeToString(operand_type);
-    					printf("Operand %u with type %s: %s\n", i, type_as_string, operand_as_string);
-    					LLVMDisposeMessage(operand_as_string);
+					printf("Operand %u with type %s: %s\n", i, type_as_string, operand_as_string);
+					printf("... Operand %u with value kind: %s\n", i, LLVMValueKind_as_string(value_kind));
+					LLVMDisposeMessage(operand_as_string);
 					LLVMDisposeMessage(type_as_string);
+					//print_LLVMValueKind(value_kind);
+					
+					
 				}
 
 
