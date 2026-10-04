@@ -45,7 +45,8 @@ enum ARM64_instruction_type {
 }
 
 union ARM64_concrete_instruction {
-	struct ARM64_ADD_IMM;
+	struct ARM64_ADD_IMM ADD_IMM;
+	struct ARM64_ADD_REG ADD_REG;
 };
 
 
@@ -57,20 +58,6 @@ union ARM64_concrete_instruction {
 //
 //
 //
-
-/*
- * The struct representing an ADD using two registers as operands. For the
- * ADD instruction using an immediate value, see ARM64_ADD_IMM. <shift> is
- * 0, 1, or 2, indicating a logical shift left, logical shift right, and
- * arithmetic shift right respectively.
- */
-struct ARM64_ADD_SHIFT {
-	unsigned int destination_reg;
-	unsigned int operand_1;
-	unsigned int operand_2;
-	unsigned int shift;
-	unsigned int shift_ammount;
-};
 
 /*
  * The struct representing an ADD using an immediate value. <shift> is either
@@ -85,5 +72,46 @@ struct ARM64_ADD_IMM {
 	unsigned int shift;
 };
 
+/*
+ * The struct representing an ADD using two registers as operands. For the
+ * ADD instruction using an immediate value, see ARM64_ADD_IMM. <shift> is
+ * 0, 1, or 2, indicating a logical shift left, logical shift right, and
+ * arithmetic shift right respectively.
+ */
+struct ARM64_ADD_REG {
+	unsigned int destination_reg;
+	unsigned int operand_1;
+	unsigned int operand_2;
+	unsigned int shift;
+	unsigned int shift_ammount;
+};
+
+
+//
+//
+//
+// High level LLVM IR structures
+// 
+// - enum LLVMIR_pattern_kind
+// - struct LLVMIR_pattern
+//
+//
+//
+
+/*
+ * The struct containing one or more LLVM IR instructions that make up a
+ * pattern. <instructions> is a pointer to one or more LLVMValueRef
+ * structures that are specifically an Instruction value.
+ */
+struct LLVMIR_pattern {
+	enum LLVMIR_pattern_kind kind;
+	int num_of_instructions;
+	LLVMValueRef *instructions;
+};
+
+enum LLVMIR_pattern_kind {
+	ADD_REG_IMM,
+	ADD_REG_REG,
+}
 
 #endif
