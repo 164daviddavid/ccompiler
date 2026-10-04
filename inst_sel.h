@@ -100,13 +100,15 @@ struct ARM64_ADD_REG {
 
 /*
  * The struct containing one or more LLVM IR instructions that make up a
- * pattern. <instructions> is a pointer to one or more LLVMValueRef
- * structures that are specifically an Instruction value.
+ * pattern. <instructions> is an LLVMValueRef iterator, where each
+ * LLVMValueRef is specifically an Instruction value. Get the next
+ * instruction by calling LLVMGetNextInstruction() with the iterator
+ * as the argument. Use <num_of_instructions> to control the iteration.
  */
 struct LLVMIR_pattern {
 	enum LLVMIR_pattern_kind kind;
 	int num_of_instructions;
-	LLVMValueRef *instructions;
+	LLVMValueRef instructions;
 };
 
 enum LLVMIR_pattern_kind {
