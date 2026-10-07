@@ -13,6 +13,26 @@ enum ARM64_instruction_type;
 struct ARM64_ADD_IMM;
 struct ARM64_ADD_REG;
 
+struct LLVMIR_pattern;
+enum LLVMIR_pattern_kind;
+
+
+
+
+
+/*
+ * <LLVMIR_pattern_identify_func>: function pointer to functions that handle
+ * specific combinations of LLVM IR instructions and determine an appropriate
+ * pattern. See section 'Functions for LLVM IR structures' for specific
+ * pattern identification functions.
+ *
+ * <LLVMIR_pattern_identify_table>: table of aforementioned function pointers.
+ * Is indexed by the LLVM IR instruction opcodes.
+ */
+typedef struct LLVMIR_pattern (*LLVMIR_pattern_identify_func)(LLVMValueRef instructions)
+LLVMIR_pattern_identify_func LLVMIR_pattern_identify_table[];
+
+
 
 
 
@@ -48,6 +68,8 @@ union ARM64_concrete_instruction {
 	struct ARM64_ADD_IMM ADD_IMM;
 	struct ARM64_ADD_REG ADD_REG;
 };
+
+
 
 
 
@@ -87,6 +109,9 @@ struct ARM64_ADD_REG {
 };
 
 
+
+
+
 //
 //
 //
@@ -112,8 +137,46 @@ struct LLVMIR_pattern {
 };
 
 enum LLVMIR_pattern_kind {
+	UNKNOWN, // used when no other pattern can be identified
 	ADD_REG_IMM,
 	ADD_REG_REG,
 }
+
+
+
+
+
+//
+//
+//
+// Functions for LLVM IR structures
+//
+//
+//
+
+/*
+ * NOTE: <window_size> IS CURRENTLY FIXED TO 1.
+ * 
+ * Reads <window_size> LLVM IR instructions starting from <instructions>,
+ * which is an iterator of LLVMValueRef (all of which are specifically
+ * an Instruction value), and identifies a suitable pattern. Returns an
+ * LLVMIR_pattern struct containing the identified pattern and instructions
+ * used.
+ * 
+ * <consumed> is the number of instructions that are used for the
+ * identified pattern (patterns will always consist of contiguous
+ * LLVM IR instructions) and is set by the function.
+ */
+struct LLVMIR_pattern identify_LLVMIR_pattern(LLVMValueRef instructions,
+											  size_t window_size,
+											  size_t *consumed);
+
+//
+// Below is the start of specific pattern identification functions.
+//
+// All will return a struct LLVMIR_pattern with <num_of_instructions> set
+// to 1 if they cannot handle the LLVM IR instructions passed to them.
+//
+struct LLVMIR_pattern identify_LLVMIR_pattern_ADD(LLVMValueRef instructions);
 
 #endif
