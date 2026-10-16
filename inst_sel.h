@@ -6,6 +6,8 @@
 #include <llvm-c/Core.h>
 
 
+struct ARM64_program;
+struct ARM64_basic_block;
 struct ARM64_instruction;
 union ARM64_concrete_instruction;
 enum ARM64_instruction_type;
@@ -29,10 +31,19 @@ enum LLVMIR_pattern_kind;
  * <LLVMIR_pattern_identify_table>: table of aforementioned function pointers.
  * Is indexed by the LLVM IR instruction opcodes.
  */
-typedef struct LLVMIR_pattern (*LLVMIR_pattern_identify_func)(LLVMValueRef instructions)
+typedef struct LLVMIR_pattern (*LLVMIR_pattern_identify_func)(LLVMValueRef instructions);
 LLVMIR_pattern_identify_func LLVMIR_pattern_identify_table[];
 
 
+/*
+ * <ARM64_inst_sel_func>: function pointer to functions that handle specific
+ * LLVM IR patterns and produce ARM64 instruction structs that represent
+ * the pattern. The instruction structs are added to the <instructions> array
+ * of a basic block struct.
+ */
+typedef int (*ARM64_inst_sel_func)(struct LLVMIR_pattern pattern,
+	                           struct *ARM64_basic_block basic_block);
+ARM64_inst_sel_func ARM64_inst_sel_table[];
 
 
 
@@ -41,12 +52,54 @@ LLVMIR_pattern_identify_func LLVMIR_pattern_identify_table[];
 //
 // High level ARM64 structures
 // 
+// - struct ARM64_program
+// - struct ARM64_basic_block
 // - enum ARM64_instruction_type
 // - union ARM64_concrete_instruction
 // - struct ARM64_instruction
 //
 //
 //
+
+/*
+ * The struct representing an ARM64 program. It contains a dynamic array
+ * of basic block structs, <basic_blocks>. The capacity of this array is
+ * represented by <capacity> and <current_size> indicates the number of
+ * basic blocks currently in the array.
+ *
+ * The array is heap allocated with an initial size that can be passed
+ * when calling ARM64_program_init().
+ *
+ * Use ARM64_program_next_empty_basic_block() to obtain a pointer to the
+ * first empty element of the array. It will automatically expand the
+ * array if it is full.
+ */
+struct ARM64_program {
+	char *name;
+	int current_size;
+	int capacity;
+	struct ARM64_basic_block *basic_blocks;
+};
+
+/*
+ * The struct representing a basic block. It contains a dynamic array of
+ * instruction structs, <instructions>. The capacity of this array is
+ * represented by <capacity> and <current_size> indicates the number of
+ * instructions currently in the array.
+ *
+ * The array is heap allocated with an initial size that can be passed
+ * when calling ARM64_basic_block_init().
+ *
+ * Use ARM64_basic_block_next_empty_instruction() to obtain a pointer to
+ * the first empty element of the array. It will automatically expand the
+ * array if it is full.
+ */
+struct ARM64_basic_block {
+	char *name;
+	int current_size;
+	int capacity;
+	struct ARM64_instruction *instructions;
+};
 
 /*
  * The overall struct representing an ARM64 instruction. <type> indicates the
@@ -69,6 +122,29 @@ union ARM64_concrete_instruction {
 	struct ARM64_ADD_REG ADD_REG;
 };
 
+
+//
+//
+//
+// Functions for ARM64 structures
+//
+//
+//
+/*
+ * Initialise an ARM64_program struct with the given name and dynamic
+ * array with the given initial size. <initial_size> must be at least
+ * 1.
+ *
+ * Returns 1 if the pointer is NULL. Returns 2 if the given name is NULL.
+ * Returns 3 if the given initial size is invalid.
+ */
+int ARM64_program_init(struct ARM64_program *program, char *name, int initial_size);
+
+int ARM64_program_next_empty_basic_block(struct ARM64_program *program);
+
+int ARM64_basic_block_init(struct ARM64_basic_block *basic_block, char *name, int initial_size);
+
+int ARM64_basic_block_next_empty_instruction(struct ARM64_basic_block *basic_block);
 
 
 

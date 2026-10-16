@@ -11,6 +11,101 @@ pattern_identify_func LLVMIR_pattern_identify_table[] = {
     [LLVMAdd] = identify_LLVMIR_pattern_ADD,
 };
 
+
+//
+//
+// Functions for ARM64 structures
+//
+//
+int ARM64_program_init(struct ARM64_program *program, char *name, int initial_size) {
+    if (program == NULL) {
+        return 1;
+    }
+    if (name == NULL) {
+        return 2;
+    }
+    if (initial_size < 1) {
+        return 3;
+    }
+
+    program->name = name;
+    program->current_size = 0;
+    program->capacity = initial_size;
+    program->basic_blocks = malloc(initial_size * sizeof(struct ARM64_basic_block));
+
+    return 0;
+}
+
+int ARM64_program_next_empty_basic_block(struct ARM64_program *program,
+                                         struct ARM64_basic_block **basic_block) {
+    int EXPANSION_FACTOR = 2;
+
+    if (program == NULL) {
+        return 1;
+    }
+    if (basic_block == NULL) {
+        return 2;
+    }
+
+    if (program->current_size == program->capacity) {
+        int new_capacity = EXPANSION_FACTOR * program->capacity
+                           * sizeof(ARM64_basic_block);
+        program->basic_blocks = realloc(program->basic_blocks, new_capacity);
+        program->capacity = new_capacity;
+    }
+
+    *basic_block = &program->basic_blocks[current_size];
+    program->current_size += 1;
+
+    return 0;
+}
+
+int ARM64_basic_block_init(struct ARM64_basic_block *basic_block, char *name,
+                           int initial_size) {
+    if (basic_block == NULL) {
+        return 1;
+    }
+    if (name == NULL) {
+        return 2;
+    }
+    if (initial_size < 1) {
+        return 3;
+    }
+
+    basic_block->name = name;
+    basic_block->current_size = 0;
+    basic_block->capacity = initial_size;
+    basic_block->instructions = malloc(initial_size * sizeof(struct ARM64_instruction));
+
+    return 0;
+}
+
+int ARM64_basic_block_next_empty_instruction(struct ARM64_basic_block *basic_block,
+                                             struct ARM64_instruction **instruction) {
+    int EXPANSION_FACTOR = 2;
+
+    if (basic_block == NULL) {
+        return 1;
+    }
+    if (instruction == NULL) {
+        return 2;
+    }
+
+    if (basic_block->current_size == basic_block->capacity) {
+        int new_capacity = EXPANSION_FACTOR * basic_block->capacity
+                           * sizeof(ARM64_instruction);
+        basic_block->basic_blocks = realloc(basic_block->basic_blocks, new_capacity);
+        basic_block->capacity = new_capacity;
+    }
+
+    *instruction = &basic_block->instructions[current_size];
+    basic_block->current_size += 1;
+
+    return 0;
+}
+
+
+
 //
 //
 //
