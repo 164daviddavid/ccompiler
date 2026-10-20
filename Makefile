@@ -1,6 +1,12 @@
 BUILD ?= debug
 CFLAGS = -Wall -Wextra
 
+TEST_DIR = tests
+FIXTURE_SRC_DIR = $(TEST_DIR)/fixture_src
+FIXTURE_BIN_DIR = $(TEST_DIR)/fixtures
+FIXTURE_SRCS = $(wildcard $(FIXTURE_SRC_DIR)/*.c)
+FIXTURE_BINS = $(patsubst $(FIXTURE_SRC_DIR)/%.c, $(FIXTURE_BIN_DIR)/%.ll, $(FIXTURE_SRCS))
+
 ifeq ($(BUILD),debug)
     CFLAGS += -g -DDEBUG
 else ifeq ($(BUILD),asan)
@@ -16,3 +22,12 @@ ccompiler: ccompiler.c util.c
 
 clean:
 	rm -f ./ccompiler
+	rm -rf $(FIXTURE_BIN_DIR)
+
+fixtures: $(FIXTURE_BIN_DIR) $(FIXTURE_BINS)
+
+$(FIXTURE_BIN_DIR)/%.ll: $(FIXTURE_SRC_DIR)/%.c
+	clang -target arm64 -S -emit-llvm -O0 -o $@ $<
+
+$(FIXTURE_BIN_DIR):
+	mkdir -p $(FIXTURE_BIN_DIR)
